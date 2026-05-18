@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include "ast_maker.h"
 #include "load_file.h"
+#include "evaluate.h"
 #include <iostream>
 
 
@@ -21,8 +22,8 @@ int main() {
   //Clean white spaces excluding NewLines
   //lexer.clean_white_spaces();
 
-  lexer.print_tokens();
-  lexer.count_tokens();
+  //lexer.print_tokens();
+  //lexer.count_tokens();
 
   //Call the TreeBuilder and feed it the read only reference
   //to the array in memory using grab_tokens()
@@ -36,6 +37,9 @@ int main() {
   // print the tree that was built
   tb.print_tree(tree, 0);
 
+  Evaluate eval(tree);
+  
+  eval.evaluate();
 
   return 0;
 }

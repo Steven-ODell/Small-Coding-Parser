@@ -10,4 +10,6 @@ add_executable(first_cmake_program
     lexer.cpp
     ast_maker.h
     ast_maker.cpp
+    evaluate.h
+    evaluate.cpp
 )

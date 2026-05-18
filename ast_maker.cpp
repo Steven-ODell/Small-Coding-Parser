@@ -38,7 +38,7 @@ vector<Node> TreeBuilder::parse_input(vector<Token> t) {
       current++;
       tree.push_back(check_function(t));
     }
-    else if (t[current].type == "If_Check"){
+    else if (t[current].type == "If_Check") {
       current++;
       tree.push_back(check_if(t));
     }
@@ -92,7 +92,7 @@ Node TreeBuilder::check_function(vector<Token> t) {
     func_inputs.type = "FunctionInputSets";
     func_inputs.value = grab_function_calls(t);
     string identifier;
-    for (int i = 0; i < func_inputs.value.length(); i++){
+    for (int i = 0; i < func_inputs.value.length(); i++) {
       if (func_inputs.value[i] != ',') {
         identifier += func_inputs.value[i];
       }
@@ -268,7 +268,7 @@ string TreeBuilder::grab_function_calls(vector<Token> t) {
   string calls;
   if (tokens[current].type == "LParen") current++;
   
-  while (current < tokens.size() && tokens[current].type != "RParen"){
+  while (current < tokens.size() && tokens[current].type != "RParen") {
     calls+= tokens[current].value;
     current++;
   }
@@ -284,7 +284,7 @@ Node TreeBuilder::collect_block(vector<Token> t) {
   while (current < t.size() && t[current].type != "RCBracket") {
     if (t[current].type == "EOL") current++; 
       
-    else if (t[current].type == "Declaration" && t[current+1].type == "Identifier"){
+    else if (t[current].type == "Declaration" && t[current+1].type == "Identifier") {
       current+=2;
       node.children.push_back(check_declaration(t));
     }

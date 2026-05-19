@@ -1,8 +1,7 @@
-let x = 5;
+let x = 3;
 let name = "Steven";
 let passing = x > 3;
 
-let test = 5 + 12;
 
 if (passing) {
     let bonus = (x + 2) * (2/1);

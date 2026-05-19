@@ -5,7 +5,9 @@
 class Evaluate {
 private:
   Node input;
-  map<string, string> memory;
+  map<string, string> frame;
+  vector<map<string, string>> memory;
+  map<string, Node> function_memory;
   int node_count;
 public:
   Evaluate(Node tree);

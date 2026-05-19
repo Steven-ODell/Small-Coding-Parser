@@ -6,6 +6,7 @@
 Evaluate::Evaluate(Node tree) {
   input = tree;
   node_count = 1;
+  memory.push_back(frame);
 }
 
 void Evaluate::evaluate() {
@@ -13,33 +14,40 @@ void Evaluate::evaluate() {
     evaluate_children(input.children[i]);
     node_count++;
   }
-  for (pair<string, string> entry : memory) {
-    cout << entry.first << " = " << entry.second << endl;
+  for (map<string, string> frame : memory) {
+    for (pair<string, string> entry : frame) {
+      cout << entry.first << " = " << entry.second << endl;
   }
+}
 }
 
 string Evaluate::evaluate_children(Node node, string context) {
   if (node.type == "Declaration") {
     if (node.children.size() > 0) {
-      cout << "Node: " << node_count << " | '" << node.value << "' setting identifier" << endl;
+      cout << "Setting identifier " << node.value << " | node " << node_count << endl;
       string declared = evaluate_children(node.children[0], node.value);
-      memory[node.value] = declared;
+      memory.back()[node.value] = declared;
       return declared;
     }
     else {
-      return memory[node.value];
+      return memory.back()[node.value];
     }
   }
+  else if (node.type == "Return") {
+    string val = evaluate_children(node.children[0]);
+    cout << "RETURN: " << val << " | node " << node_count << endl;
+    return val;
+  }
   else if (node.type == "StringLiteral") {
-    cout << "node: " << node_count << " | '" << node.value << "' stringliteral" << endl;
+    cout << "Setting StringLiteral " << node.value << " | node " << node_count << endl;
     return node.value;
   }
   else if (node.type == "Identifier") {
-    cout << "Node: " << node_count << " | '" << node.value << "' looking up identifier" << endl;
-    return memory[node.value];
+    cout << "Looking up identifier " << node.value << " | node " << node_count << endl;
+    return memory.back()[node.value];
   }
   else if (node.type == "Number") {
-    cout << "Node: " << node_count << " | '" << node.value << "' digit" << endl;
+    cout << "Digit call " << node.value << " | node " << node_count << endl;
     return node.value;
   }
   else if (node.type == "Comparison") {
@@ -47,7 +55,7 @@ string Evaluate::evaluate_children(Node node, string context) {
     string left = evaluate_children(node.children[0]);
     //node.children[1] is the right side
     string right = evaluate_children(node.children[1]);
-    cout << "Node: " << node_count << " | '" << node.value << "' comparing " << left << " | " << right << endl;
+    cout << "Comparing " << left << " | " << right << " | node " << node_count << endl;
     if (left.empty() || right.empty()) return "";
     int l = stoi(left);
     int r = stoi(right);
@@ -84,7 +92,53 @@ string Evaluate::evaluate_children(Node node, string context) {
     if (node.value == "/") return to_string(l/r);
   }
   else if (node.type == "Condition") {
+    string condition = evaluate_children(node.children[0]);
+    cout << "Checking if condition node " << node_count << endl;
+    if (condition == "true") {
+      cout << "Executing if condition node " << node_count << endl;
+      for (int  i = 0; i < node.children[1].children.size(); i++) {
+        evaluate_children(node.children[1].children[i]);
+      }
+    }
+    else {
+      cout << "Executing else condition node " << node_count << endl;
+      for (int  i = 0; i < node.children[2].children.size(); i++) {
+        evaluate_children(node.children[2].children[i]);
+      }
+    }
 
+  }
+  else if (node.type == "FunctionDeclaration") {
+    function_memory[node.value] = node;
+  }
+  else if (node.type == "FunctionCall") {
+    cout << "Called Function: " << node.value << " | node " << node_count << endl;
+    if (node.value  == "print") {
+      string print_string;
+      for (int i = 0; i < node.children.size(); i++) {
+      print_string = evaluate_children(node.children[i]);
+      }
+      cout << "PRINTING: " << print_string << endl;
+      return "";
+    }
+    Node fn  = function_memory[node.value];
+    vector<string> args_holder;
+    for (int i = 0; i < node.children.size(); i++) {
+      args_holder.push_back(evaluate_children(node.children[i]));
+    }
+    memory.push_back(map<string, string>());
+    for (int dec = 0; dec < fn.children[0].children.size(); dec++){
+      string param = fn.children[0].children[dec].value;
+      string arg = args_holder[dec];
+      memory.back()[param] = arg;
+    }
+    string result  = "";
+    for (int ev = 0; ev < fn.children[1].children.size(); ev++) {
+      string val = evaluate_children(fn.children[1].children[ev]);
+      if (!val.empty()) result = val;
+    }
+    memory.pop_back();
+    return result;
   }
   return "";
 }

@@ -1,6 +1,6 @@
 # slang
 
-A custom interpreted programming language built from scratch in C++. No libraries, no frameworks — a hand-written lexer, recursive descent parser, and AST evaluator.
+A custom interpreted programming language built from scratch in C++. No libraries, no frameworks — a hand-written lexer, recursive descent parser, AST evaluator, and scoped function call stack.
 
 ## Overview
 
@@ -16,7 +16,7 @@ source file → lexer → token stream → parser → AST → evaluator → outp
 
 **Parser** — recursive descent parser that consumes the token stream and builds an Abstract Syntax Tree. Implements full operator precedence via a three-level function chain (`check_expression` → `check_term` → `check_factor`).
 
-**Evaluator** — walks the AST and executes the program. Variable storage, scoped function execution, conditional branching.
+**Evaluator** — walks the AST and executes the program. Manages a scoped variable stack, function execution with argument binding, return values, and conditional branching.
 
 ## Language Features
 
@@ -50,13 +50,20 @@ print(total);
 - Variable declarations (`let`)
 - Arithmetic with correct precedence (`+` `-` `*` `/`)
 - Parenthesized grouping
-- Comparison operators (`>` `<` `>=` `<=` `==`)
+- Comparison operators (`>` `<` `>=` `<=`)
 - Conditional branching (`if` / `else`)
 - Function declarations with parameters (`fn`)
 - Function calls with arguments
 - Return values
 - String literals
+- Scoped function stack — each call gets its own variable frame, popped on return
 - Built-in `print`
+
+## Memory Model
+
+Variables are stored in a `vector<map<string, string>>` — a stack of scopes. The global scope lives at `memory[0]`. Each function call pushes a new frame onto the stack and pops it on return. This mirrors how real language runtimes manage the call stack.
+
+Function definitions are stored separately in a `map<string, Node>` keyed by name. When a function is called, the evaluator looks up the blueprint, binds arguments to parameter names in the new frame, executes the block, and returns the result.
 
 ## AST Example
 
@@ -86,17 +93,18 @@ Multiplication sits higher in the tree because `check_term` (which handles `*` a
 ## Project Structure
 
 ```
-├── lexer.h / lexer.cpp       — tokenizer
-├── ast_maker.h / ast_maker.cpp — recursive descent parser and AST builder
-├── load_file.h               — file loader
-├── main.cpp                  — entry point
-└── inputfile.slang           — example source file
+├── lexer.h / lexer.cpp             — tokenizer
+├── ast_maker.h / ast_maker.cpp     — recursive descent parser and AST builder
+├── evaluate.h / evaluate.cpp       — AST evaluator and scoped memory stack
+├── load_file.h                     — file loader
+├── main.cpp                        — entry point
+└── inputfile.slang                 — example source file
 ```
 
 ## Build
 
 ```bash
-g++ -o slang main.cpp lexer.cpp ast_maker.cpp
+g++ -o slang main.cpp lexer.cpp ast_maker.cpp evaluate.cpp
 ./slang
 ```
 
@@ -109,9 +117,11 @@ g++ -o slang main.cpp lexer.cpp ast_maker.cpp
 - [x] If / else blocks
 - [x] Function declarations and calls
 - [x] Return statements
-- [ ] Evaluator
-- [ ] Scope stack
-- [ ] Standard library (print, etc.)
+- [x] Evaluator
+- [x] Scoped function call stack
+- [x] Built-in print
+- [ ] Loops
+- [ ] Arrays
 
 ## Motivation
 

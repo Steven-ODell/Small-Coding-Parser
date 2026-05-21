@@ -181,6 +181,8 @@ if (current < t.size() && t[current].type == "Else_Check") {
 return condition_node;
 }
 
+//Check the lowest "priority" first. This checks the throw the left node to be checked instantly
+//
 Node TreeBuilder::check_expression(vector<Token> t) {
   Node Left = check_term(t);
   while (current < t.size() && t[current].type != "EOL") {
@@ -190,6 +192,8 @@ Node TreeBuilder::check_expression(vector<Token> t) {
       op_node.value = t[current].value;
       current++;
 
+      //Creat the second node after establishing the "base node" for the Operation
+      //now check if this has any hgiher "priority" items
       Node Right = check_term(t);
 
       op_node.children.push_back(Left);
@@ -203,6 +207,9 @@ Node TreeBuilder::check_expression(vector<Token> t) {
   return Left;
 }
 
+//Check the next "priority" being the * and /.
+//With this we do the same going down to "factor"
+//aka check what is in the "()"
 Node TreeBuilder::check_term(vector<Token> t) {
   Node Left = check_factor(t);
   while (current < t.size() && t[current].type != "EOL") {
@@ -224,9 +231,11 @@ Node TreeBuilder::check_term(vector<Token> t) {
   return Left;
 }
 
+//At this point you are inside () just check what is inside there
 Node TreeBuilder::check_factor(vector<Token> t) {
   Node node;
 
+  //If you find another function go deeper
   if (t[current].type == "Identifier" && t[current+1].type == "LParen") {
     return check_function_exec(t);
   }
@@ -244,6 +253,7 @@ Node TreeBuilder::check_factor(vector<Token> t) {
     current++;
   }
 
+  //Find more "()" then go in and check that aswell
   if (t[current].type == "LParen") {
     current++;
     node = check_expression(t);
@@ -264,6 +274,7 @@ void TreeBuilder::print_tree(Node tree, int depth) {
   }
 }
 
+//Function to just grab what is in the "()" to then use it later in the tree walking
 string TreeBuilder::grab_function_calls(vector<Token> t) {
   string calls;
   if (tokens[current].type == "LParen") current++;
@@ -278,6 +289,7 @@ string TreeBuilder::grab_function_calls(vector<Token> t) {
   return calls; 
 }
 
+//Function created to simplify grabbing what is inside a "{}" set 
 Node TreeBuilder::collect_block(vector<Token> t) {
   Node node;
   if (t[current].type == "LCBracket") current++; 

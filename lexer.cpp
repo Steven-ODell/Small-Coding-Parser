@@ -13,9 +13,9 @@ vector<Token> Lexer::tokenize() {
   for (size_t char_count = 0; char_count < input.length();) {
     Token t; //Create new token for each "token" lol
 
-    if (isalpha(input[char_count])) {
+    if (isalpha(input[char_count]) || input[char_count] == '_') {
       string word;
-      while (isalpha(input[char_count])) {
+      while (isalpha(input[char_count]) || input[char_count] == '_') {
         word += input[char_count];
         char_count++;
       }

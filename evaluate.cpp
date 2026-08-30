@@ -21,8 +21,8 @@ void Evaluate::evaluate() {
   for (map<string, string> frame : memory) {
     for (pair<string, string> entry : frame) {
       cout << entry.first << " = " << entry.second << endl;
+    }
   }
-}
 }
 
 //Evaluate function walks tree and returns outputs based on what the base node is 
@@ -95,6 +95,9 @@ string Evaluate::evaluate_children(Node node, string context) {
     string right = evaluate_children(node.children[1]);
     cout << "Operating: '" << node.value << "' " << left << " | " << right << " | node " << node_count << endl;
     if (left.empty() || right.empty()) return "";
+    else {
+      return memory.back()[node.value];
+    }
     int l = stoi(left);
     int r = stoi(right);
     if (node.value == "+") return to_string(l+r);
@@ -141,7 +144,7 @@ string Evaluate::evaluate_children(Node node, string context) {
     if (node.value  == "print") {
       string print_string;
       for (int i = 0; i < node.children.size(); i++) {
-      print_string = evaluate_children(node.children[i]);
+        print_string = evaluate_children(node.children[i]);
       }
       cout << "PRINTING: " << print_string << " | node " << node_count << endl;
       return "";
@@ -158,8 +161,11 @@ string Evaluate::evaluate_children(Node node, string context) {
     memory.push_back(map<string, string>());
     //set the params within that map linked to the args. 
     for (int dec = 0; dec < fn.children[0].children.size(); dec++){
+      //Go in and grab the param names from the placeholder function sitting in memory
       string param = fn.children[0].children[dec].value;
+      //Going through each arg and grabbing it from the list we made
       string arg = args_holder[dec];
+      //Set the new frames param aka function call placeholder with the real call. 
       memory.back()[param] = arg;
     }
     string result  = "";
